@@ -1,0 +1,4 @@
+ogrenci_no;ad;soyad;tc_kimlik_no;bolum;sinif;eposta
+220101001;Ayşe;Yılmaz;10000000146;Bilgisayar Mühendisliği;3;ayse@ogrenci.edu.tr
+220101002;İsmail;Kaya;12345678950;Bilgisayar Mühendisliği;3;ismail@ogrenci.edu.tr
+220101003;Zeynep;Demir;;Yazılım Mühendisliği;2;zeynep@ogrenci.edu.tr

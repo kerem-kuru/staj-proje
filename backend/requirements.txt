@@ -1,0 +1,16 @@
+Django==6.1.2
+djangorestframework==3.18.3
+djangorestframework_simplejwt==5.5.1
+django-cors-headers==4.9.0
+python-dotenv==1.2.4
+dj-database-url==3.1.2
+psycopg[binary]==3.3.6
+pdfplumber==0.11.10
+
+# Test
+pytest==9.2.0
+pytest-django==4.14.0
+
+# Yalnızca test örneği üretmek için (readers/tests/fixtures/make_samples.py)
+# reportlab==5.1.0
+# pypdf==6.21.4

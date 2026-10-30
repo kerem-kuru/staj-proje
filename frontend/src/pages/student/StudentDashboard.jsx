@@ -1,0 +1,46 @@
+import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { documentsApi } from '../../api/documents'
+import { getErrorMessage } from '../../api/errors'
+import { DocumentTable } from '../../components/DocumentTable'
+import { ErrorMessage } from '../../components/ErrorMessage'
+import { FileUploadForm } from '../../components/FileUploadForm'
+
+export function StudentDashboard() {
+  const navigate = useNavigate()
+  const [documents, setDocuments] = useState([])
+  const [error, setError] = useState('')
+
+  const load = useCallback(() => {
+    documentsApi
+      .list()
+      .then((data) => setDocuments(data.results))
+      .catch((err) => setError(getErrorMessage(err)))
+  }, [])
+
+  useEffect(load, [load])
+
+  async function handleUpload(file) {
+    const document = await documentsApi.upload(file)
+    navigate(`/ogrenci/belgeler/${document.id}`)
+  }
+
+  return (
+    <>
+      <h1>Belgelerim</h1>
+      <section className="card">
+        <h2>Ek-16 yükle</h2>
+        <p className="muted">
+          Staj başvuru belgenizi (Ek-16) PDF veya görüntü olarak yükleyin. Sistem belgeyi denetleyip eksikleri
+          raporlar.
+        </p>
+        <FileUploadForm onUpload={handleUpload} />
+      </section>
+      <section className="card">
+        <h2>Yüklenen belgeler</h2>
+        <ErrorMessage message={error} />
+        <DocumentTable documents={documents} detailPath={(id) => `/ogrenci/belgeler/${id}`} />
+      </section>
+    </>
+  )
+}
