@@ -7,11 +7,13 @@ yalnızca yeni bir alt sınıf eklenir.
 import csv
 import io
 from abc import ABC, abstractmethod
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
-from typing import IO, ClassVar
+from typing import IO, Any, ClassVar
 
 from django.db import transaction
+
+from readers.parsing import clean, parse_date, parse_int
 
 from .models import StudentProfile
 
@@ -27,15 +29,22 @@ class ImportResult:
 
 
 class StudentDatasetImporter(ABC):
-    # Veri setindeki sütun adı -> StudentProfile alanı
-    COLUMNS: ClassVar[dict[str, str]] = {
-        "ogrenci_no": "student_number",
-        "ad": "first_name",
-        "soyad": "last_name",
-        "tc_kimlik_no": "national_id",
-        "bolum": "department",
-        "sinif": "class_year",
-        "eposta": "email",
+    # Veri setindeki sütun adı -> (StudentProfile alanı, değeri çeviren fonksiyon, hata mesajındaki tür)
+    COLUMNS: ClassVar[dict[str, tuple[str, Callable[[str], Any], str]]] = {
+        "ogrenci_no": ("student_number", clean, "metin"),
+        "ad": ("first_name", clean, "metin"),
+        "soyad": ("last_name", clean, "metin"),
+        "tc_kimlik_no": ("national_id", clean, "metin"),
+        "uyruk": ("nationality", clean, "metin"),
+        "dogum_tarihi": ("birth_date", parse_date, "GG.AA.YYYY biçiminde tarih"),
+        "ikametgah_adresi": ("home_address", clean, "metin"),
+        "bolum": ("department", clean, "metin"),
+        "sinif": ("class_year", parse_int, "sayı"),
+        "teslim_yili": ("submission_year", clean, "metin"),
+        "onceki_staj_gun": ("previous_internship_days", parse_int, "sayı"),
+        "eposta": ("email", clean, "metin"),
+        "telefon": ("phone", clean, "metin"),
+        "saglik_statusu": ("health_status", parse_int, "sayı"),
     }
     REQUIRED: ClassVar[tuple[str, ...]] = ("ogrenci_no", "ad", "soyad", "bolum")
 
@@ -51,9 +60,10 @@ class StudentDatasetImporter(ABC):
             if missing:
                 result.errors.append(f"{line_no}. satır: eksik sütun(lar): {', '.join(missing)}")
                 continue
-            values = self._to_profile_values(row)
-            if values is None:
-                result.errors.append(f"{line_no}. satır: 'sinif' sayı olmalı.")
+            try:
+                values = self._to_profile_values(row)
+            except ValueError as exc:
+                result.errors.append(f"{line_no}. satır: {exc}")
                 continue
             number = values.pop("student_number")
             _, created = StudentProfile.objects.update_or_create(student_number=number, defaults=values)
@@ -63,17 +73,13 @@ class StudentDatasetImporter(ABC):
                 result.updated += 1
         return result
 
-    def _to_profile_values(self, row: dict[str, str]) -> dict[str, object] | None:
+    def _to_profile_values(self, row: dict[str, str]) -> dict[str, object]:
         values: dict[str, object] = {}
-        for column, field_name in self.COLUMNS.items():
-            values[field_name] = (row.get(column) or "").strip()
-        class_year = values["class_year"]
-        if class_year:
-            if not str(class_year).isdigit():
-                return None
-            values["class_year"] = int(str(class_year))
-        else:
-            values["class_year"] = None
+        for column, (field_name, parse, kind) in self.COLUMNS.items():
+            try:
+                values[field_name] = parse(row.get(column) or "")
+            except ValueError as exc:
+                raise ValueError(f"'{column}' {kind} olmalı.") from exc
         return values
 
 

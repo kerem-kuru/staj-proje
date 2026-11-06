@@ -6,7 +6,8 @@ from types import SimpleNamespace
 import pytest
 
 from readers.base import ReaderError
-from readers.pdf_form import NOT_EK16_MESSAGE, SCAN_MESSAGE, PdfFormReader, label_key
+from readers.parsing import split_identity
+from readers.pdf_form import NOT_EK16_MESSAGE, UNSUPPORTED_MESSAGE, PdfFormReader, label_key
 from validation.engine import ValidationEngine
 
 from .pdf_builder import build_pdf
@@ -44,14 +45,15 @@ class TestBlankForm:
 
 class TestFilledForm:
     def test_student_section(self, filled):
-        assert filled.national_id == "10000000146"
+        assert (filled.national_id, filled.nationality) == ("10000000146", "T.C.")
         assert filled.department == "Bilgisayar Mühendisliği"
         assert filled.student_full_name == "Ayşe Yılmaz"
         assert filled.previous_internship_days == 0
         assert filled.birth_date == date(2004, 5, 10)
         assert filled.student_number == "220101001"
-        assert (filled.student_email, filled.student_phone) == ("ayse@ogrenci.edu.tr", "0555 123 45 67")
-        assert filled.home_address == "Umuttepe Mah. İzmit / Kocaeli"
+        assert (filled.student_email, filled.student_phone) == ("ayse@ogrenci.edu.tr", "+90 555 123 45 67")
+        assert filled.academic_year == "2026-2027 Bahar"
+        assert filled.home_address == "Umuttepe Mah., Yıldız Sok., No: 12, Daire: 3, İzmit/Kocaeli"
         assert filled.health_status == 2
 
     def test_workplace_section(self, filled):
@@ -65,8 +67,11 @@ class TestFilledForm:
         assert filled.supervisor_name == "Mehmet Öztürk"
         assert filled.supervisor_email == "mehmet@ornek.com.tr"
         assert filled.has_company_stamp is True
-        assert filled.has_student_signature is True
-        assert filled.student_approval_date == date(2027, 5, 1)
+
+    def test_approval_sections_are_empty(self, filled):
+        assert filled.has_student_signature is False
+        assert filled.student_approval_date is None
+        assert filled.has_advisor_entry is False
 
     def test_filled_form_passes_validation(self, filled, context):
         result = ValidationEngine.default().run(filled, context)
@@ -89,11 +94,30 @@ class TestRejectedInputs:
     def test_image_file(self):
         with pytest.raises(ReaderError) as exc:
             read(b"\x89PNG\r\n\x1a\n", filename="ek16.png")
-        assert str(exc.value) == SCAN_MESSAGE
+        assert str(exc.value) == UNSUPPORTED_MESSAGE
+
+    def test_word_file(self):
+        with pytest.raises(ReaderError) as exc:
+            read(b"PK\x03\x04", filename="ek16.docx")
+        assert str(exc.value) == UNSUPPORTED_MESSAGE
 
     def test_corrupt_pdf(self):
         with pytest.raises(ReaderError, match="açılamadı"):
             read(b"%PDF-1.4 bozuk")
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("10000000146 / T.C.", ("10000000146", "T.C.")),
+        ("99123456780 / Azerbaycan", ("99123456780", "Azerbaycan")),
+        ("10000000146", ("10000000146", None)),
+        ("Bosna-Hersek", (None, "Bosna-Hersek")),
+        ("", (None, None)),
+    ],
+)
+def test_split_identity(text, expected):
+    assert split_identity(text) == expected
 
 
 @pytest.mark.parametrize(

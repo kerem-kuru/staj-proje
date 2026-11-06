@@ -1,4 +1,4 @@
-"""Boş Ek-16 şablonundan (ek16_bos.pdf) testlerde kullanılan dolu örneği üretir.
+"""Boş Ek-16 şablonunu (ek16_bos.pdf) verilen değerlerle doldurur.
 
 Bir kez çalıştırılıp çıktı depoya eklenir; testler bu betiğe bağlı değildir.
 Gereksinimler (yalnızca bu betik için): pip install reportlab pypdf
@@ -22,22 +22,22 @@ FONT = "C:/Windows/Fonts/arial.ttf"
 # Etiketin ilk satırı -> yazılacak satırlar. Aynı etiket birden fazla tabloda geçtiği için tablo sırası da var.
 VALUES: list[dict[str, list[str]]] = [
     {  # ÖĞRENCİNİN
-        "T.C. KİMLİK NO/ UYRUĞU": ["10000000146"],
+        "T.C. KİMLİK NO/ UYRUĞU": ["10000000146 / T.C."],
         "BÖLÜMÜ": ["Bilgisayar Mühendisliği"],
         "ADI SOYADI": ["Ayşe Yılmaz"],
         "DAHA ÖNCE YAPTIĞI STAJ GÜN SAYISI": ["0"],
         "DOĞUM TARİHİ": ["10.05.2004"],
-        "ÖĞRETİM YILI": ["2026-2027"],
+        "ÖĞRETİM YILI": ["2026-2027 Bahar"],
         "ÖĞRENCİ NUMARASI": ["220101001"],
-        "E-POSTA ADRESİ /TELEFON NO": ["ayse@ogrenci.edu.tr / 0555 123 45 67"],
-        "İKAMETGÂH ADRESİ": ["Umuttepe Mah.", "İzmit / Kocaeli"],
+        "E-POSTA ADRESİ /TELEFON NO": ["ayse@ogrenci.edu.tr / +90 555 123 45 67"],
+        "İKAMETGÂH ADRESİ": ["Umuttepe Mah., Yıldız Sok.,", "No: 12, Daire: 3,", "İzmit/Kocaeli"],
     },
     {  # STAJ YAPILAN YERİN
         "Adı": ["Örnek Yazılım A.Ş."],
         "Yurtdışı Stajımı? (E/H)": ["H"],
         "Hizmet Alanı": ["Yazılım"],
         "Staj Başlama Tarihi": ["14.06.2027"],
-        "Telefon No": ["0262 123 45 67"],
+        "Telefon No": ["+90 262 123 45 67"],
         "Staj Bitiş Tarihi": ["09.07.2027"],
         "Staj Gün Sayısı": ["20"],
         "E-Posta Adresi": ["ik@ornek.com.tr"],
@@ -46,13 +46,13 @@ VALUES: list[dict[str, list[str]]] = [
         "Çalışan Sayısı": ["45"],
         "Mühendis Sayısı": ["12"],
         "Ücret Alıyor mu? (E / H) - (**)": ["H"],
-        "Adres Bilgisi": ["Kocaeli Teknopark, Başiskele / Kocaeli"],
+        "Adres Bilgisi": ["Yeşilova Mah., Teknopark Cad., No: 5, Daire: 1, Başiskele/Kocaeli"],
     },
     {  # İŞVEREN VEYA YETKİLİNİN
         "Adı Soyadı": ["Mehmet Öztürk"],
         "Görev / Unvanı": ["Yazılım Müdürü"],
         "E-Posta adresi": ["mehmet@ornek.com.tr"],
-        "Telefon No": ["0262 123 45 68"],
+        "Telefon No": ["+90 262 123 45 68"],
     },
 ]
 
@@ -62,7 +62,21 @@ def first_line(page: pdfplumber.page.Page, bbox: tuple[float, float, float, floa
     return text.split("\n")[0].strip()
 
 
-def build_filled() -> bytes:
+def _scribble(c: canvas.Canvas, x: float, y: float) -> None:
+    path = c.beginPath()
+    path.moveTo(x, y)
+    path.curveTo(x + 15, y + 12, x + 25, y - 8, x + 45, y + 4)
+    c.drawPath(path)
+
+
+def build_filled(
+    values: list[dict[str, list[str]]] = VALUES,
+    *,
+    health_option: int | None = 2,
+    stamped: bool = True,
+    student_approved: bool = False,
+    advisor_approved: bool = False,
+) -> bytes:
     pdfmetrics.registerFont(TTFont("Arial", FONT))
     with pdfplumber.open(TEMPLATE) as pdf:
         page = pdf.pages[0]
@@ -72,13 +86,13 @@ def build_filled() -> bytes:
         c.setFont("Arial", 7.5)
 
         tables = page.find_tables()
-        for table, values in zip(tables[:3], VALUES, strict=True):
+        for table, section in zip(tables[:3], values, strict=True):
             for row in table.rows:
                 cells = row.cells
                 for i in range(0, len(cells) - 1, 2):
                     if cells[i] is None or cells[i + 1] is None:
                         continue
-                    lines = values.get(first_line(page, cells[i]))
+                    lines = section.get(first_line(page, cells[i]))
                     if not lines:
                         continue
                     x0, top, x1, _ = cells[i + 1]
@@ -91,27 +105,25 @@ def build_filled() -> bytes:
                         c.drawString(x0 + 3, height - top - 9 - n * 8.5, line)
                     c.setFont("Arial", 7.5)
 
-        # Sağlık yardım statüsü: 2. seçeneğin yanına X
-        box = next(w for w in page.extract_words() if w["text"] == "2-☐")
-        c.drawString(box["x1"] + 3, height - box["bottom"] + 1, "X")
-
-        # İşveren imza/kaşe: daire + imza eğrisi
-        stamp = next(w for w in page.extract_words() if w["text"] == "Kaşe")
-        c.circle(stamp["x1"] + 60, height - stamp["bottom"] + 2, 18)
-        path = c.beginPath()
-        path.moveTo(stamp["x1"] + 100, height - stamp["bottom"])
-        path.curveTo(stamp["x1"] + 120, height - stamp["bottom"] + 15, stamp["x1"] + 130, height - stamp["bottom"] - 10, stamp["x1"] + 150, height - stamp["bottom"] + 5)
-        c.drawPath(path)
-
-        # Öğrenci onayı: tarih ve imza (soldaki onay kutusundaki ilk "Tarih:" ve "İmza:")
         words = page.extract_words()
-        tarih = min((w for w in words if w["text"] == "Tarih:"), key=lambda w: w["x0"])
-        imza = min((w for w in words if w["text"] == "İmza:"), key=lambda w: w["x0"])
-        c.drawString(tarih["x1"] + 4, height - tarih["bottom"] + 2, "01.05.2027")
-        path = c.beginPath()
-        path.moveTo(imza["x1"] + 5, height - imza["bottom"] + 2)
-        path.curveTo(imza["x1"] + 20, height - imza["bottom"] + 14, imza["x1"] + 30, height - imza["bottom"] - 6, imza["x1"] + 50, height - imza["bottom"] + 6)
-        c.drawPath(path)
+        if health_option is not None:
+            box = next(w for w in words if w["text"] == f"{health_option}-☐")
+            c.drawString(box["x1"] + 3, height - box["bottom"] + 1, "X")
+
+        if stamped:
+            stamp = next(w for w in words if w["text"] == "Kaşe")
+            c.circle(stamp["x1"] + 60, height - stamp["bottom"] + 2, 18)
+            _scribble(c, stamp["x1"] + 100, height - stamp["bottom"])
+
+        # Şartnameye göre öğrenci ve danışman onay kısımları boş kalır; bunlar hatalı senaryolar içindir.
+        dates = sorted((w for w in words if w["text"] == "Tarih:"), key=lambda w: w["x0"])
+        signatures = sorted((w for w in words if w["text"] == "İmza:"), key=lambda w: w["x0"])
+        if student_approved:
+            c.drawString(dates[0]["x1"] + 4, height - dates[0]["bottom"] + 2, "01.11.2026")
+            _scribble(c, signatures[0]["x1"] + 5, height - signatures[0]["bottom"] + 2)
+        if advisor_approved:
+            c.drawString(dates[-1]["x1"] + 4, height - dates[-1]["bottom"] + 2, "01.11.2026")
+            _scribble(c, signatures[-1]["x1"] + 5, height - signatures[-1]["bottom"] + 2)
 
         c.save()
 

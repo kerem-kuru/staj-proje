@@ -18,6 +18,7 @@ from .serializers import (
     DocumentDetailSerializer,
     DocumentSerializer,
     DocumentUploadSerializer,
+    EngineerDepartmentSerializer,
     RejectSerializer,
 )
 from .services.document_service import DocumentService
@@ -32,7 +33,7 @@ class DocumentViewSet(
     """Öğrenci kendi belgelerini, admin tüm belgeleri görür. İş kuralları DocumentService'tedir."""
 
     ADMIN_ACTIONS = {"partial_update", "complete", "reject"}
-    STUDENT_ACTIONS = {"create", "reupload"}
+    STUDENT_ACTIONS = {"create", "reupload", "engineer_department"}
 
     def get_permissions(self) -> list[BasePermission]:
         if self.action in self.ADMIN_ACTIONS:
@@ -44,12 +45,19 @@ class DocumentViewSet(
     def get_queryset(self) -> QuerySet[Document]:
         queryset = Document.objects.select_related("student").prefetch_related("reports")
         queryset = policy_for(self.request.user).scope(queryset, self.request.user)
-        status_filter = self.request.query_params.get("status")
+        status_filter = self._status_param("status")
         if status_filter:
-            if status_filter not in DocumentStatus.values:
-                raise ValidationError({"status": [f"Geçersiz statü: {status_filter}"]})
             queryset = queryset.filter(status=status_filter)
+        excluded = self._status_param("exclude_status")
+        if excluded:
+            queryset = queryset.exclude(status=excluded)
         return queryset
+
+    def _status_param(self, name: str) -> str | None:
+        value = self.request.query_params.get(name)
+        if value and value not in DocumentStatus.values:
+            raise ValidationError({name: [f"Geçersiz statü: {value}"]})
+        return value
 
     def get_serializer_class(self) -> type[BaseSerializer]:
         return DocumentDetailSerializer if self.action == "retrieve" else DocumentSerializer
@@ -67,7 +75,7 @@ class DocumentViewSet(
             raise NotFound("Öğrenci profiliniz bulunamadı.")
         serializer = DocumentUploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        document = self._service().upload(profile, serializer.validated_data["file"])
+        document = self._service().upload(profile, **serializer.validated_data)
         return self._detail_response(document, status.HTTP_201_CREATED)
 
     def partial_update(self, request: Request, pk: str | None = None) -> Response:
@@ -84,7 +92,15 @@ class DocumentViewSet(
     def reupload(self, request: Request, pk: str | None = None) -> Response:
         serializer = DocumentUploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        document = self._service().reupload(request.user, self.get_object(), serializer.validated_data["file"])
+        document = self._service().reupload(request.user, self.get_object(), **serializer.validated_data)
+        return self._detail_response(document)
+
+    @action(detail=True, methods=["post"], url_path="engineer-department")
+    def engineer_department(self, request: Request, pk: str | None = None) -> Response:
+        serializer = EngineerDepartmentSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        department = serializer.validated_data["engineer_department"]
+        document = self._service().set_engineer_department(request.user, self.get_object(), department)
         return self._detail_response(document)
 
     @action(detail=True, methods=["post"])

@@ -109,7 +109,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "accounts.authentication.VersionedJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
@@ -138,7 +138,12 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 DOCUMENT_UPLOAD = {
     "MAX_SIZE_MB": int(os.getenv("DOCUMENT_MAX_UPLOAD_MB", "10")),
-    "ALLOWED_EXTENSIONS": ["pdf", "jpg", "jpeg", "png"],
+    "ALLOWED_EXTENSIONS": ["pdf", "doc", "docx", "jpg", "jpeg", "png"],
+}
+
+LOGIN_LOCK = {
+    "MAX_FAILURES": int(os.getenv("LOGIN_MAX_FAILURES", "5")),
+    "MINUTES": int(os.getenv("LOGIN_LOCK_MINUTES", "15")),
 }
 
 INTERNSHIP_RULES = {

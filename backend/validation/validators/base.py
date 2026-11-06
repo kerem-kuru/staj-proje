@@ -2,12 +2,16 @@
 
 BaseValidator (soyut)
  ├── RequiredFieldsValidator, UnparsedValuesValidator, StudentIdentityValidator,
- │   InternshipDatesValidator, WorkDaysValidator, HealthStatusValidator,
- │   InternshipConditionsValidator, SignatureValidator
+ │   AcademicYearValidator, InternshipDatesValidator, WorkDaysValidator,
+ │   EngineerCountValidator, HealthStatusValidator, InternshipConditionsValidator,
+ │   SignatureValidator
+ ├── NationalIdValidator (uyruğa göre aşağıdaki iki kuraldan birini çalıştırır)
  └── FieldFormatValidator (soyut, tek alanın biçimi)
-      ├── NationalIdValidator
+      ├── TurkishIdValidator
+      ├── ForeignIdValidator
       ├── EmailFormatValidator
-      └── PhoneFormatValidator
+      ├── PhoneFormatValidator
+      └── AddressFormatValidator
 
 ValidationEngine hepsini aynı `validate()` arayüzüyle çağırır (çok biçimlilik).
 """
@@ -35,8 +39,9 @@ class BaseValidator(ABC):
 class FieldFormatValidator(BaseValidator):
     """Tek bir alanın biçimini denetler. Boş alanlar RequiredFieldsValidator'ın işidir."""
 
-    def __init__(self, field_name: str) -> None:
+    def __init__(self, field_name: str, severity: Severity = Severity.ERROR) -> None:
         self._field_name = field_name
+        self._severity = severity
 
     @property
     def field_name(self) -> str:
@@ -49,7 +54,7 @@ class FieldFormatValidator(BaseValidator):
         if self.is_valid_value(str(value)):
             return []
         label = Ek16Data.label_for(self._field_name)
-        return [self._issue(self._field_name, self.error_message(label))]
+        return [self._issue(self._field_name, self.error_message(label), self._severity)]
 
     @abstractmethod
     def is_valid_value(self, value: str) -> bool: ...

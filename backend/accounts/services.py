@@ -1,9 +1,48 @@
+import logging
+import math
+from datetime import timedelta
+
+from django.conf import settings
 from django.db import transaction
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from students.models import StudentProfile
 
-from .models import Role, User
+from .exceptions import AccountLocked
+from .models import LoginAttempt, LoginLock, Role, User
+
+logger = logging.getLogger(__name__)
+
+
+class LoginGuard:
+    """Giriş denemelerini kaydeder, üst üste hatalı denemede e-postayı süreli kilitler."""
+
+    def __init__(self, email: str, ip_address: str | None) -> None:
+        self._email = email.strip().lower()
+        self._ip_address = ip_address
+
+    def ensure_not_locked(self) -> None:
+        now = timezone.now()
+        lock = LoginLock.objects.filter(email=self._email).first()
+        if lock is not None and lock.is_locked(now):
+            logger.warning("Kilitli hesaba giriş denemesi: %s (%s)", self._email, self._ip_address)
+            raise AccountLocked(math.ceil((lock.locked_until - now).total_seconds() / 60))
+
+    def record_failure(self) -> None:
+        logger.warning("Başarısız giriş denemesi: %s (%s)", self._email, self._ip_address)
+        self._log(succeeded=False)
+        rules = settings.LOGIN_LOCK
+        lock, _ = LoginLock.objects.get_or_create(email=self._email)
+        lock.register_failure(timezone.now(), rules["MAX_FAILURES"], timedelta(minutes=rules["MINUTES"]))
+        lock.save()
+
+    def record_success(self) -> None:
+        self._log(succeeded=True)
+        LoginLock.objects.filter(email=self._email).delete()
+
+    def _log(self, *, succeeded: bool) -> None:
+        LoginAttempt.objects.create(email=self._email, ip_address=self._ip_address, succeeded=succeeded)
 
 
 @transaction.atomic

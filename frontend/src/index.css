@@ -279,3 +279,23 @@ button.warning {
 .issue-warning .issue-tag {
   color: var(--warning);
 }
+
+.plan-fields {
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+}
+
+.weekdays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 8px;
+}
+
+.alert-warning {
+  background: #fff8e1;
+  border: 1px solid #f0c36d;
+  margin-top: 12px;
+}

@@ -49,6 +49,8 @@ class FileSignature:
 
     SIGNATURES: ClassVar[dict[str, tuple[bytes, ...]]] = {
         "pdf": (b"%PDF",),
+        "doc": (b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1",),
+        "docx": (b"PK\x03\x04",),
         "png": (b"\x89PNG\r\n\x1a\n",),
         "jpg": (b"\xff\xd8\xff",),
         "jpeg": (b"\xff\xd8\xff",),

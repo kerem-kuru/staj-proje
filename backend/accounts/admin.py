@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User
+from .models import LoginAttempt, LoginLock, User
 
 
 @admin.register(User)
@@ -19,3 +19,16 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {"classes": ("wide",), "fields": ("email", "first_name", "last_name", "role", "password1", "password2")}),
     )
+
+
+@admin.register(LoginAttempt)
+class LoginAttemptAdmin(admin.ModelAdmin):
+    list_display = ["created_at", "email", "ip_address", "succeeded"]
+    list_filter = ["succeeded"]
+    search_fields = ["email"]
+
+
+@admin.register(LoginLock)
+class LoginLockAdmin(admin.ModelAdmin):
+    list_display = ["email", "failures", "locked_until"]
+    search_fields = ["email"]

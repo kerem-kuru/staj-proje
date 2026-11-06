@@ -10,43 +10,47 @@ const STATUS_FILTERS = [
   { value: 'HATALI_EKSIK', label: 'Hatalı/Eksik' },
   { value: 'INCELENIYOR', label: 'İnceleniyor' },
   { value: 'YUKLENDI', label: 'Yüklendi' },
-  { value: 'TAMAMLANDI', label: 'Tamamlandı' },
 ]
+const COMPLETED = 'TAMAMLANDI'
 
-export function AdminDocuments() {
-  const [status, setStatus] = useState('ONAYLANDI')
+// Tamamlanan belgeler ayrı sekmede listelenir; `completed` bu sekmeyi seçer.
+export function AdminDocuments({ completed = false }) {
+  const [status, setStatus] = useState('')
   const [page, setPage] = useState(1)
   const [data, setData] = useState({ results: [], count: 0, next: null, previous: null })
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const params = { page, ...(status && { status }) }
+    const scope = completed ? { status: COMPLETED } : { exclude_status: COMPLETED, ...(status && { status }) }
+    const params = { page, ...scope }
     documentsApi
       .list(params)
       .then(setData)
       .catch((err) => setError(getErrorMessage(err)))
-  }, [status, page])
+  }, [completed, status, page])
 
   return (
     <>
-      <h1>Belgeler</h1>
+      <h1>{completed ? 'Tamamlanan belgeler' : 'Başvurular'}</h1>
       <div className="toolbar">
-        <label>
-          Statü{' '}
-          <select
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value)
-              setPage(1)
-            }}
-          >
-            {STATUS_FILTERS.map((f) => (
-              <option key={f.value} value={f.value}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        {!completed && (
+          <label>
+            Statü{' '}
+            <select
+              value={status}
+              onChange={(e) => {
+                setStatus(e.target.value)
+                setPage(1)
+              }}
+            >
+              {STATUS_FILTERS.map((f) => (
+                <option key={f.value} value={f.value}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <span className="muted">{data.count} belge</span>
       </div>
       <ErrorMessage message={error} />

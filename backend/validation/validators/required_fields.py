@@ -41,7 +41,6 @@ class RequiredFieldsValidator(BaseValidator):
         "supervisor_title",
         "supervisor_email",
         "supervisor_phone",
-        "student_approval_date",
     )
 
     def validate(self, data: Ek16Data, context: ValidationContext) -> list[ValidationIssue]:

@@ -1,7 +1,7 @@
 from dataclasses import replace
 from datetime import date
 
-from documents.services.internship_plan import HolidayCalendar
+from documents.services.internship_plan import HolidayCalendar, InternshipPlan
 from validation.types import Severity
 from validation.validators import InternshipDatesValidator, WorkDaysValidator
 
@@ -26,7 +26,8 @@ class TestInternshipDatesValidator:
         assert issue.severity is Severity.ERROR
         assert issue.message == (
             "Staj kabul formu staj başlama tarihinden en az 30 gün önce teslim edilmelidir; "
-            "stajın başlamasına 14 gün kaldı."
+            "stajın başlamasına 14 gün kaldı. Önerilen teslim tarihi en geç 17.04.2027; bugün teslim için "
+            "staj en erken 02.06.2027 tarihinde başlamalı."
         )
 
     def test_exactly_30_days_is_enough(self, valid_data, context):
@@ -44,26 +45,35 @@ class TestInternshipDatesValidator:
 
 
 class TestWorkDaysValidator:
-    def test_declared_matches_computed(self, valid_data, context):
+    def test_declared_matches_plan(self, valid_data, context):
         assert WorkDaysValidator().validate(valid_data, context) == []
 
     def test_declared_does_not_match(self, valid_data, context):
         valid_data.work_days = 25
         [issue] = WorkDaysValidator().validate(valid_data, context)
-        assert issue.message == "Formda staj gün sayısı 25 yazıyor, ancak tarihler arasında 20 iş günü var."
+        assert issue.message == "Formda staj gün sayısı 25 yazıyor, ancak seçtiğiniz plana göre 20 iş günü var."
 
-    def test_too_short_internship(self, valid_data, context):
-        valid_data.end_date = date(2027, 6, 18)  # 5 iş günü
-        valid_data.work_days = 5
-        [issue] = WorkDaysValidator().validate(valid_data, context)
-        assert "en az 20 iş günü" in issue.message
+    def test_document_dates_must_match_selected_dates(self, valid_data, context):
+        valid_data.start_date = date(2027, 6, 21)
+        valid_data.end_date = date(2027, 7, 16)
+        issues = WorkDaysValidator().validate(valid_data, context)
+        assert [i.field for i in issues] == ["start_date", "end_date"]
+        assert issues[0].message == "Belgedeki 'Staj başlama tarihi' seçtiğiniz tarihle (14.06.2027) uyuşmuyor."
 
-    def test_holidays_are_not_counted(self, valid_data, context):
-        holiday = HolidayCalendar([date(2027, 6, 15)])
-        issues = WorkDaysValidator().validate(valid_data, replace(context, calendar=holiday))
+    def test_selected_weekdays_change_the_count(self, valid_data, context):
+        plan = InternshipPlan(date(2027, 6, 14), date(2027, 7, 9), frozenset({0, 1, 2}))
+        issues = WorkDaysValidator().validate(valid_data, replace(context, selected_plan=plan))
+        assert "en az 20 iş günü" in issues[0].message  # haftada 3 günden 12 gün
+        assert "12 iş günü var" in issues[1].message
+
+    def test_official_holidays_are_not_counted(self, valid_data, context):
+        calendar = HolidayCalendar([date(2027, 6, 15)])
+        plan = InternshipPlan(date(2027, 6, 14), date(2027, 7, 9), calendar=calendar)
+        issues = WorkDaysValidator().validate(valid_data, replace(context, selected_plan=plan))
         assert len(issues) == 2  # 19 iş günü: hem yetersiz hem uyuşmuyor
 
-    def test_weekend_work_counts_saturdays(self, valid_data, context):
-        valid_data.works_weekend = True  # 14 Haziran - 9 Temmuz arasında 3 cumartesi var
-        issues = WorkDaysValidator().validate(valid_data, context)
-        assert "23 iş günü var" in issues[0].message
+    def test_weekend_in_plan_but_not_in_form(self, valid_data, context):
+        plan = InternshipPlan.from_work_days(date(2027, 6, 14), 20, frozenset(range(6)))
+        valid_data.end_date, valid_data.work_days = plan.end_date, plan.work_days
+        [issue] = WorkDaysValidator().validate(valid_data, replace(context, selected_plan=plan))
+        assert issue.field == "works_weekend"

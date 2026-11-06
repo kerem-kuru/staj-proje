@@ -24,6 +24,13 @@ class StudentProfile(models.Model):
     department = models.CharField("bölüm", max_length=150)
     class_year = models.PositiveSmallIntegerField("sınıf", null=True, blank=True)
     email = models.EmailField("e-posta", blank=True)
+    nationality = models.CharField("uyruk", max_length=100, blank=True)
+    birth_date = models.DateField("doğum tarihi", null=True, blank=True)
+    home_address = models.TextField("ikametgâh adresi", blank=True)
+    submission_year = models.CharField("Ek-16 teslim yılı", max_length=9, blank=True)
+    previous_internship_days = models.PositiveIntegerField("önceki staj gün sayısı", null=True, blank=True)
+    phone = models.CharField("telefon", max_length=20, blank=True)
+    health_status = models.PositiveSmallIntegerField("sağlık yardımı statüsü", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

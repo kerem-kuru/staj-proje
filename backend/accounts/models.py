@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Any
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
@@ -41,6 +42,8 @@ class User(AbstractUser):
     username = None
     email = models.EmailField("e-posta", unique=True)
     role = models.CharField("rol", max_length=20, choices=Role.choices, default=Role.STUDENT)
+    # Token'lara yazılır; artırıldığında o ana kadar verilmiş tüm token'lar geçersiz olur.
+    token_version = models.PositiveIntegerField("token sürümü", default=0, editable=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name"]
@@ -64,3 +67,49 @@ class User(AbstractUser):
     @property
     def is_admin(self) -> bool:
         return self.has_role(Role.ADMIN)
+
+    def revoke_tokens(self) -> None:
+        self.token_version += 1
+        self.save(update_fields=["token_version"])
+
+
+class LoginAttempt(models.Model):
+    """Giriş denemesi kaydı. Var olmayan e-postalar da yazıldığı için User'a bağlı değildir."""
+
+    email = models.CharField("e-posta", max_length=254, db_index=True)
+    ip_address = models.GenericIPAddressField("IP adresi", null=True, blank=True)
+    succeeded = models.BooleanField("başarılı")
+    created_at = models.DateTimeField("zaman", auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "giriş denemesi"
+        verbose_name_plural = "giriş denemeleri"
+
+    def __str__(self) -> str:
+        return f"{self.email} ({'başarılı' if self.succeeded else 'başarısız'})"
+
+
+class LoginLock(models.Model):
+    """Bir e-posta için üst üste hatalı deneme sayısı ve kilit süresi. Kaydı silmek kilidi açar."""
+
+    email = models.CharField("e-posta", max_length=254, unique=True)
+    failures = models.PositiveSmallIntegerField("hatalı deneme", default=0)
+    locked_until = models.DateTimeField("kilit bitişi", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "giriş kilidi"
+        verbose_name_plural = "giriş kilitleri"
+
+    def __str__(self) -> str:
+        return self.email
+
+    def is_locked(self, now: datetime) -> bool:
+        return self.locked_until is not None and now < self.locked_until
+
+    def register_failure(self, now: datetime, max_failures: int, lock_for: timedelta) -> None:
+        if self.locked_until is not None and now >= self.locked_until:
+            self.failures, self.locked_until = 0, None  # süresi dolan kilit sayacı sıfırlar
+        self.failures += 1
+        if self.failures >= max_failures:
+            self.locked_until = now + lock_for

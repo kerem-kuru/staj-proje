@@ -3,6 +3,7 @@
 View'lar yalnızca bu servisi çağırır; statü ve yetki kuralları burada uygulanır.
 """
 import logging
+from datetime import date
 
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
@@ -31,20 +32,37 @@ class DocumentService:
 
     # --- Öğrenci işlemleri -----------------------------------------------
 
-    def upload(self, student: StudentProfile, file: UploadedFile) -> Document:
+    def upload(
+        self, student: StudentProfile, file: UploadedFile, plan_start: date, plan_end: date, plan_weekdays: list[int]
+    ) -> Document:
         with transaction.atomic():
-            document = Document.objects.create(student=student, file=file, original_filename=file.name)
+            document = Document.objects.create(
+                student=student,
+                file=file,
+                original_filename=file.name,
+                plan_start=plan_start,
+                plan_end=plan_end,
+                plan_weekdays=plan_weekdays,
+            )
         return self.process(document)
 
-    def reupload(self, user: User, document: Document, file: UploadedFile) -> Document:
+    def reupload(
+        self, user: User, document: Document, file: UploadedFile, plan_start: date, plan_end: date, plan_weekdays: list[int]
+    ) -> Document:
         self._ensure_can_modify(user, document)
         old_file_name = document.file.name
         with transaction.atomic():
-            document.replace_file(file)
+            document.replace_file(file, plan_start, plan_end, plan_weekdays)
             document.save()
         if old_file_name:
             document.file.storage.delete(old_file_name)
         return self.process(document)
+
+    def set_engineer_department(self, user: User, document: Document, department: str) -> Document:
+        self._ensure_can_modify(user, document)
+        document.engineer_department = department.strip()
+        document.save(update_fields=["engineer_department", "updated_at"])
+        return document
 
     # --- Denetim ------------------------------------------------------------
 

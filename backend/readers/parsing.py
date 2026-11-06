@@ -11,6 +11,7 @@ _DMY_RE = re.compile(r"(\d{1,2})[./-](\d{1,2})[./-](\d{4}|\d{2})")
 _YMD_RE = re.compile(r"(\d{4})-(\d{1,2})-(\d{1,2})")
 _EMAIL_RE = re.compile(r"[^@\s/;,]+@[^@\s/;,]+\.[^@\s/;,]+")
 _CHECK_MARKS = "☒☑✓✔✗✘■●"
+_TURKISH_NATIONALITIES = frozenset({"", "tc", "türk", "türkiye", "türkiyecumhuriyeti"})
 
 
 def normalize_tr(text: str) -> str:
@@ -95,6 +96,20 @@ def parse_choice(text: str | None, options: range) -> int | None:
     if len(selected) > 1:
         raise ValueError(text)
     return selected[0] if selected else None
+
+
+def split_identity(text: str | None) -> tuple[str | None, str | None]:
+    """'T.C. kimlik no / uyruğu' hücresini (numara, uyruk) olarak ayırır."""
+    value = clean(text)
+    match = re.search(r"\S*\d\S*", value)
+    number = match.group(0) if match else None
+    rest = value.replace(number, " ", 1) if number else value
+    return number, clean(rest.strip(" /;,|-")) or None
+
+
+def is_turkish_nationality(text: str | None) -> bool:
+    """Uyruk yazılmamışsa T.C. vatandaşı kabul edilir."""
+    return normalize_tr(clean(text)).replace(".", "").replace(" ", "") in _TURKISH_NATIONALITIES
 
 
 def split_contact(text: str | None) -> tuple[str | None, str | None]:

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { getErrorMessage } from '../api/errors'
 import { ErrorMessage } from './ErrorMessage'
 
-export function FileUploadForm({ onUpload, accept = '.pdf,.jpg,.jpeg,.png', buttonLabel = 'Yükle' }) {
+export function FileUploadForm({ onUpload, accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png', buttonLabel = 'Evrak Yükle' }) {
   const [file, setFile] = useState(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')

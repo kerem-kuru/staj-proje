@@ -20,6 +20,13 @@ class StudentProfileSerializer(serializers.ModelSerializer):
             "department",
             "class_year",
             "email",
+            "nationality",
+            "birth_date",
+            "home_address",
+            "submission_year",
+            "previous_internship_days",
+            "phone",
+            "health_status",
             "has_account",
         ]
         read_only_fields = fields

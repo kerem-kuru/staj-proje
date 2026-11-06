@@ -2,11 +2,32 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { documentsApi } from '../../api/documents'
 import { getErrorMessage } from '../../api/errors'
+import { EngineerDepartmentBox } from '../../components/EngineerDepartmentBox'
 import { ErrorMessage } from '../../components/ErrorMessage'
 import { ExtractedDataTable } from '../../components/ExtractedDataTable'
 import { FileUploadForm } from '../../components/FileUploadForm'
+import { InternshipPlanFields } from '../../components/InternshipPlanFields'
+import { PlanSummary } from '../../components/PlanSummary'
 import { ReportView } from '../../components/ReportView'
 import { StatusBadge } from '../../components/StatusBadge'
+
+function ReuploadForm({ doc, onDone }) {
+  const [plan, setPlan] = useState({
+    start: doc.plan_start ?? '',
+    end: doc.plan_end ?? '',
+    weekdays: doc.plan_weekdays,
+  })
+
+  return (
+    <>
+      <InternshipPlanFields plan={plan} onChange={setPlan} />
+      <FileUploadForm
+        buttonLabel="Yeniden yükle"
+        onUpload={(file) => documentsApi.reupload(doc.id, file, plan).then(onDone)}
+      />
+    </>
+  )
+}
 
 export function StudentDocumentDetail() {
   const { id } = useParams()
@@ -50,12 +71,20 @@ export function StudentDocumentDetail() {
       <section className="card">
         <h2>Denetim sonucu</h2>
         <ReportView report={doc.latest_report} />
+        {doc.needs_engineer_department && doc.status !== 'TAMAMLANDI' && (
+          <EngineerDepartmentBox doc={doc} onSaved={setDoc} />
+        )}
+      </section>
+
+      <section className="card">
+        <h2>Staj planı</h2>
+        <PlanSummary doc={doc} />
       </section>
 
       {doc.permissions.can_reupload && (
         <section className="card">
           <h2>Düzeltilmiş belgeyi yükle</h2>
-          <FileUploadForm buttonLabel="Yeniden yükle" onUpload={(file) => documentsApi.reupload(id, file).then(setDoc)} />
+          <ReuploadForm doc={doc} onDone={setDoc} />
         </section>
       )}
 

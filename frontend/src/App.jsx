@@ -32,7 +32,8 @@ export default function App() {
         </Route>
 
         <Route element={<ProtectedRoute roles={[ROLES.ADMIN]} />}>
-          <Route path="/yonetim" element={<AdminDocuments />} />
+          <Route path="/yonetim" element={<AdminDocuments key="basvurular" />} />
+          <Route path="/yonetim/tamamlanan" element={<AdminDocuments key="tamamlanan" completed />} />
           <Route path="/yonetim/belgeler/:id" element={<AdminDocumentDetail />} />
           <Route path="/yonetim/ogrenciler" element={<AdminStudents />} />
         </Route>

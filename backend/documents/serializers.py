@@ -23,6 +23,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source="student.full_name", read_only=True)
     latest_report = serializers.SerializerMethodField()
     extracted_fields = serializers.SerializerMethodField()
+    needs_engineer_department = serializers.BooleanField(read_only=True)
     permissions = serializers.SerializerMethodField()
 
     class Meta:
@@ -40,6 +41,11 @@ class DocumentSerializer(serializers.ModelSerializer):
             "extracted_data",
             "extracted_fields",
             "admin_note",
+            "plan_start",
+            "plan_end",
+            "plan_weekdays",
+            "engineer_department",
+            "needs_engineer_department",
             "latest_report",
             "permissions",
             "created_at",
@@ -85,9 +91,27 @@ class DocumentDetailSerializer(DocumentSerializer):
 
 
 class DocumentUploadSerializer(serializers.ModelSerializer):
+    """Belge ile öğrencinin seçtiği staj planını birlikte alır."""
+
+    plan_start = serializers.DateField()
+    plan_end = serializers.DateField()
+    plan_weekdays = serializers.ListField(
+        child=serializers.IntegerField(min_value=0, max_value=6), allow_empty=False
+    )
+
     class Meta:
         model = Document
-        fields = ["file"]
+        fields = ["file", "plan_start", "plan_end", "plan_weekdays"]
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        if attrs["plan_end"] < attrs["plan_start"]:
+            raise serializers.ValidationError({"plan_end": ["Bitiş tarihi başlangıçtan önce olamaz."]})
+        attrs["plan_weekdays"] = sorted(set(attrs["plan_weekdays"]))
+        return attrs
+
+
+class EngineerDepartmentSerializer(serializers.Serializer):
+    engineer_department = serializers.CharField(max_length=150)
 
 
 class AdminNoteSerializer(serializers.Serializer):

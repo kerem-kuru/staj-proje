@@ -13,7 +13,8 @@ export function LoginPage() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
-  if (user) return <Navigate to={homePathFor(user)} replace />
+  const forbidden = location.state?.forbidden === true
+  if (user && !forbidden) return <Navigate to={homePathFor(user)} replace />
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -34,6 +35,7 @@ export function LoginPage() {
   return (
     <div className="auth-card">
       <h1>Giriş</h1>
+      {forbidden && <ErrorMessage message="Bu sayfaya erişim yetkiniz yok. Yetkili bir hesapla giriş yapın." />}
       <form onSubmit={handleSubmit} className="stack">
         <label>
           E-posta

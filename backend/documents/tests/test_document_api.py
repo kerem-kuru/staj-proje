@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
@@ -6,13 +6,24 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework import status
 
 from documents.models import Document
+from documents.services.internship_plan import InternshipPlan
 from documents.workflow import DocumentStatus
 
 URL = "/api/documents/"
 
 
-def upload(client, file):
-    return client.post(URL, {"file": file}, format="multipart")
+def _plan() -> dict:
+    today = date.today()
+    start = today + timedelta(days=40 + (7 - (today + timedelta(days=40)).weekday()) % 7)
+    plan = InternshipPlan.from_work_days(start, 20)
+    return {"plan_start": plan.start_date, "plan_end": plan.end_date, "plan_weekdays": [0, 1, 2, 3, 4]}
+
+
+PLAN = _plan()
+
+
+def upload(client, file, **overrides):
+    return client.post(URL, {**PLAN, "file": file, **overrides}, format="multipart")
 
 
 @pytest.mark.django_db
@@ -36,7 +47,7 @@ class TestStudentUpload:
     def test_reupload_after_fix_gets_approved(self, student_client, pdf_file):
         doc_id = upload(student_client, pdf_file("ek16_eksik.pdf")).data["id"]
 
-        response = student_client.post(f"{URL}{doc_id}/reupload/", {"file": pdf_file("ek16.pdf")}, format="multipart")
+        response = student_client.post(f"{URL}{doc_id}/reupload/", {**PLAN, "file": pdf_file("ek16.pdf")}, format="multipart")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data["status"] == DocumentStatus.APPROVED
@@ -45,14 +56,44 @@ class TestStudentUpload:
 
     def test_reupload_not_allowed_when_approved(self, student_client, pdf_file):
         doc_id = upload(student_client, pdf_file()).data["id"]
-        response = student_client.post(f"{URL}{doc_id}/reupload/", {"file": pdf_file()}, format="multipart")
+        response = student_client.post(f"{URL}{doc_id}/reupload/", {**PLAN, "file": pdf_file()}, format="multipart")
         assert response.status_code == status.HTTP_409_CONFLICT
 
     def test_invalid_file_type(self, student_client):
-        response = upload(student_client, SimpleUploadedFile("ek16.docx", b"PK..."))
+        response = upload(student_client, SimpleUploadedFile("ek16.txt", b"metin"))
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data["detail"] == "Gönderilen veriler geçersiz."
         assert "file" in response.data["errors"]
+
+    @pytest.mark.parametrize(
+        ("name", "content"),
+        [("ek16.docx", b"PK\x03\x04word"), ("ek16.doc", b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1word")],
+    )
+    def test_word_files_are_accepted(self, student_client, name, content):
+        response = upload(student_client, SimpleUploadedFile(name, content))
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_word_extension_with_other_content_is_refused(self, student_client):
+        response = upload(student_client, SimpleUploadedFile("ek16.docx", b"metin"))
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_plan_is_required(self, student_client, pdf_file):
+        response = student_client.post(URL, {"file": pdf_file()}, format="multipart")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert {"plan_start", "plan_end", "plan_weekdays"} <= response.data["errors"].keys()
+
+    def test_plan_end_cannot_precede_start(self, student_client, pdf_file):
+        response = upload(student_client, pdf_file(), plan_end=PLAN["plan_start"] - timedelta(days=1))
+        assert "plan_end" in response.data["errors"]
+
+    def test_invalid_weekday_is_refused(self, student_client, pdf_file):
+        response = upload(student_client, pdf_file(), plan_weekdays=[7])
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_selected_plan_is_saved(self, student_client, pdf_file):
+        response = upload(student_client, pdf_file())
+        assert response.data["plan_weekdays"] == [0, 1, 2, 3, 4]
+        assert response.data["plan_start"] == PLAN["plan_start"].isoformat()
 
     def test_admin_cannot_upload(self, admin_client, pdf_file):
         assert upload(admin_client, pdf_file()).status_code == status.HTTP_403_FORBIDDEN
@@ -97,7 +138,7 @@ class TestCompletedDocumentRules:
         assert Document.objects.filter(pk=completed_id).exists()
 
     def test_student_cannot_reupload_completed(self, student_client, completed_id, pdf_file):
-        response = student_client.post(f"{URL}{completed_id}/reupload/", {"file": pdf_file()}, format="multipart")
+        response = student_client.post(f"{URL}{completed_id}/reupload/", {**PLAN, "file": pdf_file()}, format="multipart")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_admin_can_update_and_delete_completed(self, admin_client, completed_id):
@@ -150,7 +191,8 @@ class TestWithRealPdfReader:
 
     def _upload_fixture(self, client, name):
         content = (self.FIXTURES / name).read_bytes()
-        return upload(client, SimpleUploadedFile(name, content, content_type="application/pdf"))
+        file = SimpleUploadedFile(name, content, content_type="application/pdf")
+        return upload(client, file, plan_start=date(2027, 6, 14), plan_end=date(2027, 7, 9))
 
     def test_blank_form_is_rejected(self, student_client):
         response = self._upload_fixture(student_client, "ek16_bos.pdf")
@@ -158,7 +200,7 @@ class TestWithRealPdfReader:
         assert response.data["status"] == DocumentStatus.REJECTED
         report = response.data["latest_report"]
         assert report["reader_name"] == "pdf"
-        assert len(report["issues"]) >= 30
+        assert len(report["issues"]) >= 25
 
     def test_filled_form_is_approved(self, student_client):
         response = self._upload_fixture(student_client, "ek16_dolu.pdf")
@@ -179,3 +221,48 @@ class TestWithRealPdfReader:
         assert response.data["status"] == DocumentStatus.REJECTED
         [issue] = response.data["latest_report"]["issues"]
         assert issue["code"] == "reader_error"
+
+
+@pytest.mark.django_db
+class TestEngineerDepartment:
+    def _document(self, student_client, pdf_file, engineers):
+        doc_id = upload(student_client, pdf_file()).data["id"]
+        document = Document.objects.get(pk=doc_id)
+        document.extracted_data["engineer_count"] = engineers
+        document.save()
+        return doc_id
+
+    def test_asked_when_fewer_than_five(self, student_client, pdf_file):
+        doc_id = self._document(student_client, pdf_file, 3)
+        assert student_client.get(f"{URL}{doc_id}/").data["needs_engineer_department"] is True
+
+    def test_not_asked_for_five_or_more(self, student_client, pdf_file):
+        doc_id = self._document(student_client, pdf_file, 5)
+        assert student_client.get(f"{URL}{doc_id}/").data["needs_engineer_department"] is False
+
+    def test_student_answers(self, student_client, pdf_file):
+        doc_id = self._document(student_client, pdf_file, 3)
+        response = student_client.post(
+            f"{URL}{doc_id}/engineer-department/", {"engineer_department": "Yazılım Mühendisliği"}, format="json"
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["engineer_department"] == "Yazılım Mühendisliği"
+
+    def test_completed_document_is_locked(self, student_client, admin_client, pdf_file):
+        doc_id = self._document(student_client, pdf_file, 3)
+        admin_client.post(f"{URL}{doc_id}/complete/")
+        response = student_client.post(
+            f"{URL}{doc_id}/engineer-department/", {"engineer_department": "Yazılım"}, format="json"
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+def test_exclude_status_separates_completed_tab(student_client, admin_client, pdf_file):
+    completed = upload(student_client, pdf_file()).data["id"]
+    upload(student_client, pdf_file())
+    admin_client.post(f"{URL}{completed}/complete/")
+
+    assert admin_client.get(URL, {"exclude_status": "TAMAMLANDI"}).data["count"] == 1
+    assert admin_client.get(URL, {"status": "TAMAMLANDI"}).data["count"] == 1
+    assert admin_client.get(URL, {"exclude_status": "YOK"}).status_code == status.HTTP_400_BAD_REQUEST

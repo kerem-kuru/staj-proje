@@ -17,7 +17,7 @@ from pdfplumber.table import Table
 
 from .base import DocumentReader, ReaderError
 from .ek16 import Ek16Data
-from .parsing import normalize_tr, split_contact
+from .parsing import normalize_tr, split_contact, split_identity
 
 if TYPE_CHECKING:
     from documents.models import Document
@@ -29,6 +29,10 @@ SCAN_MESSAGE = (
     "bilgisayarda doldurulup PDF olarak kaydedilmiş Ek-16 okunabiliyor."
 )
 NOT_EK16_MESSAGE = "Yüklenen belge Ek-16 Staj Kabul Formu değil. Sistem yalnızca Ek-16 işler."
+UNSUPPORTED_MESSAGE = (
+    "Bu dosya türü kabul edildi ancak içeriği henüz otomatik okunamıyor (OCR entegrasyonu final aşamasında). "
+    "Şimdilik bilgisayarda doldurulup PDF olarak kaydedilmiş Ek-16 denetlenebiliyor."
+)
 LAYOUT_MESSAGE = "Formun tablo yapısı tanınamadı. Lütfen değiştirilmemiş Ek-16 şablonunu kullanın."
 
 # Normalize edilmiş etiket -> Ek16Data alanı ("_contact" e-posta/telefon olarak ikiye ayrılır)
@@ -83,7 +87,7 @@ class PdfFormReader(DocumentReader):
 
     def _extract(self, content: bytes, document: "Document") -> Ek16Data:
         if not document.original_filename.lower().endswith(".pdf"):
-            raise ReaderError(SCAN_MESSAGE)
+            raise ReaderError(UNSUPPORTED_MESSAGE)
         try:
             pdf = pdfplumber.open(io.BytesIO(content))
         except Exception as exc:  # pdfminer bozuk dosyada farklı hata türleri fırlatabiliyor
@@ -112,13 +116,16 @@ class _Ek16Page:
 
         email, phone = split_contact(raw.pop("_contact", ""))
         raw["student_email"], raw["student_phone"] = email or "", phone or ""
+        national_id, nationality = split_identity(raw.pop("national_id", ""))
+        raw["national_id"], raw["nationality"] = national_id or "", nationality or ""
 
-        approval_box = sections["approval"].rows[0].cells[0]
+        approval_box, advisor_box = sections["approval"].rows[0].cells[:2]
         raw["student_approval_date"] = self._approval_date(approval_box)
 
         data = Ek16Data.from_raw(raw)
         data.has_company_stamp = self._has_graphics(self._stamp_region(sections["employer"]))
         data.has_student_signature = self._has_graphics(approval_box)
+        data.has_advisor_entry = self._advisor_filled(advisor_box)
         return data
 
     # --- Belge kontrolü -------------------------------------------------------
@@ -182,6 +189,11 @@ class _Ek16Page:
         tail = re.sub(r"İmza\s*:?", " ", tail)
         date_like = re.search(r"\d{1,2}\s*[./-]\s*\d{1,2}\s*[./-]\s*\d{2,4}", tail)
         return date_like.group(0).replace(" ", "") if date_like else tail.strip()
+
+    def _advisor_filled(self, box: Bbox) -> bool:
+        """Kutunun sabit etiketleri dışında metin ya da çizim varsa danışman kısmı doldurulmuştur."""
+        written = re.sub(r"(Adı|Soyadı|Tarih|İmza)\s*:", " ", self._text(box))
+        return bool(written.strip()) or self._has_graphics(box)
 
     def _stamp_region(self, employer: Table) -> Bbox:
         """'İmza / Kaşe' hücresinden tablonun sağ alt köşesine kadar olan alan."""

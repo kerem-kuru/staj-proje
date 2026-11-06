@@ -14,7 +14,7 @@ class TestFileExtensionTr:
     def test_allowed(self, name):
         FileExtensionTr()(make_file(name))
 
-    @pytest.mark.parametrize("name", ["ek16.docx", "ek16", "virus.exe"])
+    @pytest.mark.parametrize("name", ["ek16.txt", "ek16", "virus.exe"])
     def test_rejected(self, name):
         with pytest.raises(ValidationError, match="Desteklenmeyen dosya türü"):
             FileExtensionTr()(make_file(name))

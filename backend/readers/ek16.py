@@ -23,7 +23,8 @@ def _field(label: str, kind: str = "text", default: Any = None) -> Any:
 @dataclass
 class Ek16Data:
     # ÖĞRENCİNİN
-    national_id: str | None = _field("T.C. kimlik no / uyruğu")
+    national_id: str | None = _field("T.C. kimlik no / yabancı kimlik no")
+    nationality: str | None = _field("Uyruğu")
     department: str | None = _field("Bölümü")
     student_full_name: str | None = _field("Öğrenci adı soyadı")
     previous_internship_days: int | None = _field("Daha önce yaptığı staj gün sayısı", "int")
@@ -59,6 +60,8 @@ class Ek16Data:
     # ÖĞRENCİNİN ONAYI
     student_approval_date: date | None = _field("Öğrenci onay tarihi", "date")
     has_student_signature: bool = _field("Öğrenci imzası", "flag", False)
+    # STAJ DANIŞMANI ONAYI
+    has_advisor_entry: bool = _field("Staj danışmanı onay kısmı dolu", "flag", False)
     # Okunan ama anlaşılamayan değerler: alan adı -> formdaki ham metin
     unparsed: dict[str, str] = field(default_factory=dict, metadata={"label": "Anlaşılamayan değerler", "kind": "meta"})
 

@@ -4,6 +4,7 @@ import { documentsApi } from '../../api/documents'
 import { getErrorMessage } from '../../api/errors'
 import { ErrorMessage } from '../../components/ErrorMessage'
 import { ExtractedDataTable } from '../../components/ExtractedDataTable'
+import { PlanSummary } from '../../components/PlanSummary'
 import { ReportView } from '../../components/ReportView'
 import { StatusBadge } from '../../components/StatusBadge'
 
@@ -89,6 +90,11 @@ export function AdminDocumentDetail() {
       <section className="card">
         <h2>Son denetim</h2>
         <ReportView report={doc.latest_report} />
+      </section>
+
+      <section className="card">
+        <h2>Öğrencinin seçtiği staj planı</h2>
+        <PlanSummary doc={doc} />
       </section>
 
       <section className="card">

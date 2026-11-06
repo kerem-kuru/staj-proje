@@ -5,7 +5,8 @@ import { useAuth } from '../auth/useAuth'
 const LINKS = {
   [ROLES.STUDENT]: [{ to: '/ogrenci', label: 'Belgelerim' }],
   [ROLES.ADMIN]: [
-    { to: '/yonetim', label: 'Belgeler' },
+    { to: '/yonetim', label: 'Başvurular' },
+    { to: '/yonetim/tamamlanan', label: 'Tamamlandı' },
     { to: '/yonetim/ogrenciler', label: 'Öğrenci Veri Seti' },
   ],
 }

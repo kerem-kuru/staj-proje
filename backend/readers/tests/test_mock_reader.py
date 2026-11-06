@@ -13,7 +13,14 @@ from validation.engine import ValidationEngine
 @pytest.fixture
 def document(student_profile, pdf_file):
     def make(name: str = "ek16.pdf") -> Document:
-        return Document.objects.create(student=student_profile, file=pdf_file(name), original_filename=name)
+        return Document.objects.create(
+            student=student_profile,
+            file=pdf_file(name),
+            original_filename=name,
+            plan_start=date(2027, 6, 14),
+            plan_end=date(2027, 7, 9),
+            plan_weekdays=[0, 1, 2, 3, 4],
+        )
 
     return make
 

@@ -11,8 +11,18 @@ def test_counts_weekdays_only():
 
 
 def test_saturday_work():
-    plan = InternshipPlan(date(2027, 6, 14), date(2027, 6, 27), works_saturday=True)
+    plan = InternshipPlan(date(2027, 6, 14), date(2027, 6, 27), weekdays=frozenset(range(6)))
     assert plan.work_days == 12
+
+
+def test_selected_weekdays_only():
+    plan = InternshipPlan(date(2027, 6, 14), date(2027, 6, 27), weekdays=frozenset({0, 1, 2}))
+    assert plan.work_days == 6
+
+
+def test_includes_weekend():
+    assert InternshipPlan(date(2027, 6, 14), date(2027, 6, 27), weekdays=frozenset({0, 5})).includes_weekend
+    assert not InternshipPlan(date(2027, 6, 14), date(2027, 6, 27)).includes_weekend
 
 
 def test_fixed_official_holiday_is_skipped():

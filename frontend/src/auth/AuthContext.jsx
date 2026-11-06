@@ -25,7 +25,9 @@ export function AuthProvider({ children }) {
     return me
   }, [])
 
-  const logout = useCallback(() => {
+  // Token'lar sunucuda geçersiz kılınır; sunucuya ulaşılamasa da yerel oturum kapanır.
+  const logout = useCallback(async () => {
+    await authApi.logout().catch(() => {})
     tokenStorage.clear()
     setUser(null)
   }, [])

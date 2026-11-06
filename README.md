@@ -16,13 +16,13 @@ Sistem yalnızca Ek-16 işler: farklı bir belge yüklenirse reddedilir.
 
 **Öğrenci**
 - Okulun öğrenci listesinde kayıtlı numarasıyla hesap açar.
-- Ek-16'yı PDF olarak yükler ve denetim sonucunu hemen görür.
+- Staj yapacağı haftalık günleri ve tarih aralığını seçip Ek-16'yı yükler, denetim sonucunu hemen görür.
 - Formdan okunan bilgileri ve bulunan her hatayı/uyarıyı ayrı ayrı inceler.
 - "Hatalı/Eksik" çıkan formu düzeltip yeniden yükler; önceki denetim raporları saklanır.
 
 **Yönetici (staj komisyonu)**
-- Öğrenci listesini CSV olarak içe aktarır.
-- Tüm belgeleri statüye göre listeler, raporlarını ve geçmişini inceler.
+- Öğrenci veri setini CSV olarak içe aktarır.
+- Başvuruları statüye göre listeler, raporlarını ve geçmişini inceler; tamamlananlar ayrı sekmededir.
 - Onaylanan belgeyi "Tamamlandı" olarak işaretler ya da gerekçe yazarak geri çevirir.
 - Tamamlanan belgeler Ek-17 üretimine temel oluşturur.
 
@@ -42,23 +42,27 @@ Form, Kocaeli Üniversitesi Mühendislik Fakültesi Staj Kabul Formu (Ek-16) şa
 
 | Kural | Örnek bulgu |
 |-------|-------------|
-| Zorunlu alanların dolu olması | 'Staj yeri adı' alanı boş bırakılmış. |
+| Zorunlu alanların dolu olması (faks ve web adresi hariç) | 'Staj yeri adı' alanı boş bırakılmış. |
 | Değerlerin biçimi (tarih, E/H, sayı) | 'Staj başlama tarihi' alanındaki '32.13.2027' değeri anlaşılamadı; GG.AA.YYYY biçiminde yazılmalı. |
-| Öğrenci listesiyle eşleşme (numara, ad soyad, T.C. no, bölüm) | Belgedeki öğrenci numarası sizin numaranızla uyuşmuyor. |
-| T.C. kimlik numarası algoritması (yabancı uyruk kabul edilir) | 'T.C. kimlik no / uyruğu' geçerli bir T.C. kimlik numarası değil. |
-| E-posta ve telefon biçimi | 'Yetkili e-posta adresi' geçerli bir e-posta adresi değil. |
-| Formun staj başlangıcından en az 30 gün önce teslimi | Stajın başlamasına 14 gün kaldı. |
-| Staj gün sayısının tarihlerle uyuşması (hafta sonu ve resmî tatiller hesaba katılır) | Formda staj gün sayısı 25 yazıyor, ancak tarihler arasında 20 iş günü var. |
+| Veri setindeki kayıtla eşleşme (numara, ad soyad, kimlik no, uyruk, doğum tarihi, adres, önceki staj günü, e-posta, telefon, sağlık statüsü, bölüm) | Belgedeki 'Doğum tarihi' öğrenci kaydıyla uyuşmuyor. |
+| Uyruğa göre kimlik kontrolü: T.C. için algoritma, yabancı uyruk için 11 hane ve 99 ile başlama | Yabancı uyruklu öğrencinin kimlik numarası 11 haneli olmalı ve 99 ile başlamalı. |
+| E-posta biçimi | 'Yetkili e-posta adresi' geçerli bir e-posta adresi değil. |
+| Telefon biçimi: `+90 xxx xxx xx xx` | 'Öğrenci telefon no' +90 xxx xxx xx xx biçiminde olmalı. |
+| Adres: Mahalle, Cadde/Sokak, Bina No, Daire No, İlçe/İl sırası (staj yeri adresinde uyarı) | 'İkametgâh adresi' Mahalle, Cadde/Sokak, Bina No, Daire No, İlçe/İl sırasıyla ve tam yazılmalı … |
+| Öğretim yılı: yarıyıl bilgisi, ardışık yıllar, teslim yılı ve staj tarihleriyle uyum | Öğretim yılındaki yıllar ardışık olmalı (ör. 2026-2027). |
+| Formun staj başlangıcından en az 30 gün önce teslimi, önerilen tarih | … Önerilen teslim tarihi en geç 17.04.2027; bugün teslim için staj en erken 02.06.2027 tarihinde başlamalı. |
+| Seçilen plandan hesaplanan günlerin (resmî tatiller çıkarılır) belgeyle uyuşması | Formda staj gün sayısı 25 yazıyor, ancak seçtiğiniz plana göre 20 iş günü var. |
 | Asgari staj süresi | Staj süresi en az 20 iş günü olmalı. |
+| Mühendis sayısı en az 1; 5'in altındaysa mezun olunan bölüm sorulur | Mühendis sayısı 5'in altında; mühendisin mezun olduğu bölümü belirtin. (uyarı) |
 | Sağlık yardım statüsünde tek seçim, 25 yaş notu | … 25 yaş ve üstü öğrenciler sağlık yardım statüsünde 6 numaralı seçeneği işaretler. (uyarı) |
 | Yurtdışı / ücretli staj yükümlülükleri | Ücretli stajda staj bitiminde EK-18 … dekontla birlikte komisyona teslim edilmelidir. (uyarı) |
-| Öğrenci imzası, işveren kaşe ve imzası | Belgede firma kaşesi ve yetkili imzası bulunamadı. |
+| İşveren kısmı kaşe ve imzalı; öğrenci ve danışman onay kısımları boş | Öğrenci onay kısmı boş bırakılmalı. |
 
 Hatalar formun onaylanmasını engeller. Uyarılar ise yalnızca bilgilendirme amaçlıdır.
 
-**Okunabilen belgeler:** Bilgisayarda doldurulup PDF olarak kaydedilmiş Ek-16. Taranmış belge,
-fotoğraf ve JPG/PNG dosyalarında okunacak metin olmadığından bunlar şu an desteklenmiyor. Böyle bir
-belge yüklenirse nedeni rapor edilir.
+**Okunabilen belgeler:** Word, PDF, JPEG ve PNG yüklenebilir; diğer türler reddedilir. İçeriği şu an
+yalnızca bilgisayarda doldurulup PDF olarak kaydedilmiş Ek-16 okunabiliyor. Word, taranmış belge ve
+fotoğraflar OCR entegrasyonuyla (final aşaması) okunacak; bunlar yüklenirse nedeni rapor edilir.
 
 ## Teknolojiler
 
@@ -76,10 +80,11 @@ Proje, nesne yönelimli programlamanın dört ilkesini kodda açıkça gösterec
 
 - **Soyutlama:** `DocumentReader` belgenin nasıl okunduğunu gizler. `BaseValidator` her kuralın iç
   mantığını gizler. `DocumentPolicy` rol bazlı erişimi gizler.
-- **Kalıtım:** `BaseValidator → FieldFormatValidator → NationalIdValidator / EmailFormatValidator / PhoneFormatValidator`
-  hiyerarşisi kuruldu. Ayrıca `RolePermission → IsStudent / IsAdmin`.
-- **Çok biçimlilik:** `ValidationEngine` tüm kuralları aynı `validate()` çağrısıyla çalıştırır. Öğrenci
-  ve yönetici politikaları aynı arayüzü farklı kurallarla uygular.
+- **Kalıtım:** `BaseValidator → FieldFormatValidator → TurkishIdValidator / ForeignIdValidator / EmailFormatValidator /
+  PhoneFormatValidator / AddressFormatValidator` hiyerarşisi kuruldu. Ayrıca `RolePermission → IsStudent / IsAdmin`.
+- **Çok biçimlilik:** `ValidationEngine` tüm kuralları aynı `validate()` çağrısıyla çalıştırır.
+  `NationalIdValidator` uyruğa göre T.C. ya da yabancı kimlik kuralını çalıştırır. Öğrenci ve yönetici
+  politikaları aynı arayüzü farklı kurallarla uygular.
 - **Kapsülleme:** Belgenin statüsü yalnızca izin verilen geçişlerle değişir; model kuralı atlayan
   değişikliği reddeder. Denetim sonucundaki bulgu listesi dışarıdan değiştirilemez.
 
@@ -118,9 +123,8 @@ npm run dev                       # http://localhost:5173
 | Yönetici | admin@staj.local | Admin.12345 |
 | Öğrenci | ayse@ogrenci.edu.tr | Ogrenci.12345 |
 
-Denemek için `backend/readers/tests/fixtures/` klasöründeki dosyaları kullanabilirsiniz:
-- `ek16_bos.pdf`: boş form, **Hatalı/Eksik** olur.
-- `ek16_dolu.pdf`: demo öğrenci için doldurulmuş form, **Onaylandı** olur.
+Denemek için `deneme-verisi/` klasöründe veri seti ve her kural için ayrı Ek-16 senaryoları var;
+adımlar ve beklenen sonuçlar `deneme-verisi/README.md` içinde.
 
 ### Testler
 
@@ -135,14 +139,16 @@ Tüm yanıtlar JSON biçimindedir. Hatalar her zaman `{"detail": "...", "errors"
 
 | Metot | Yol | Kim | Açıklama |
 |-------|-----|-----|----------|
-| POST | `/api/auth/login/` | herkes | `{email, password}` → `{access, refresh}` |
+| POST | `/api/auth/login/` | herkes | `{email, password}` → `{access, refresh}`; 5 hatalı denemede 15 dakika kilit (423) |
+| POST | `/api/auth/logout/` | giriş yapmış | kullanıcının tüm token'larını geçersiz kılar |
 | POST | `/api/auth/refresh/` | herkes | erişim token'ını yeniler |
 | POST | `/api/auth/register/` | herkes | öğrenci kaydı (numara öğrenci listesinde olmalı) |
 | GET | `/api/auth/me/` | giriş yapmış | oturumdaki kullanıcı |
-| GET | `/api/documents/?status=` | öğrenci: kendi, yönetici: tümü | belge listesi |
-| POST | `/api/documents/` | öğrenci | Ek-16 yükle (multipart `file`) |
+| GET | `/api/documents/?status=&exclude_status=` | öğrenci: kendi, yönetici: tümü | belge listesi |
+| POST | `/api/documents/` | öğrenci | Ek-16 yükle (multipart `file`, `plan_start`, `plan_end`, `plan_weekdays`) |
 | GET | `/api/documents/{id}/` | sahibi / yönetici | detay, okunan bilgiler, rapor geçmişi |
-| POST | `/api/documents/{id}/reupload/` | öğrenci | Hatalı/Eksik belgeyi yeniden yükle |
+| POST | `/api/documents/{id}/reupload/` | öğrenci | Hatalı/Eksik belgeyi plan bilgisiyle yeniden yükle |
+| POST | `/api/documents/{id}/engineer-department/` | öğrenci | `{engineer_department}` mühendisin mezun olduğu bölüm |
 | GET | `/api/documents/{id}/download/` | sahibi / yönetici | dosyayı indir |
 | DELETE | `/api/documents/{id}/` | sahibi (Tamamlandı değilse) / yönetici | sil |
 | PATCH | `/api/documents/{id}/` | yönetici | `{admin_note}` |
@@ -170,5 +176,6 @@ frontend/src/
   pages/student/     öğrenci sayfaları
   pages/admin/       yönetici sayfaları
   components/        ortak bileşenler
-docs/                diyagramlar ve rapor notları
+docs/                diyagramlar, PNG çıktıları, referans rapor ve rapor notları
+deneme-verisi/       elle deneme için veri seti ve Ek-16 senaryoları
 ```

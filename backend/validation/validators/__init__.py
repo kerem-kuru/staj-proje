@@ -1,6 +1,16 @@
+from ..types import Severity
+from .academic_year import AcademicYearValidator
 from .base import BaseValidator, FieldFormatValidator
 from .declarations import HealthStatusValidator, InternshipConditionsValidator
-from .formats import EmailFormatValidator, NationalIdValidator, PhoneFormatValidator
+from .engineers import EngineerCountValidator
+from .formats import (
+    AddressFormatValidator,
+    EmailFormatValidator,
+    ForeignIdValidator,
+    NationalIdValidator,
+    PhoneFormatValidator,
+    TurkishIdValidator,
+)
 from .internship import InternshipDatesValidator, WorkDaysValidator
 from .required_fields import RequiredFieldsValidator, UnparsedValuesValidator
 from .signature import SignatureValidator
@@ -21,8 +31,13 @@ def default_validators() -> list[BaseValidator]:
         PhoneFormatValidator("company_phone"),
         PhoneFormatValidator("company_fax"),
         PhoneFormatValidator("supervisor_phone"),
+        AddressFormatValidator("home_address"),
+        # İş yerlerinde daire no her zaman olmadığı için staj yeri adresi yalnızca uyarı verir.
+        AddressFormatValidator("company_address", Severity.WARNING),
+        AcademicYearValidator(),
         InternshipDatesValidator(),
         WorkDaysValidator(),
+        EngineerCountValidator(),
         HealthStatusValidator(),
         InternshipConditionsValidator(),
         SignatureValidator(),
@@ -30,9 +45,13 @@ def default_validators() -> list[BaseValidator]:
 
 
 __all__ = [
+    "AcademicYearValidator",
+    "AddressFormatValidator",
     "BaseValidator",
     "EmailFormatValidator",
+    "EngineerCountValidator",
     "FieldFormatValidator",
+    "ForeignIdValidator",
     "HealthStatusValidator",
     "InternshipConditionsValidator",
     "InternshipDatesValidator",
@@ -41,6 +60,7 @@ __all__ = [
     "RequiredFieldsValidator",
     "SignatureValidator",
     "StudentIdentityValidator",
+    "TurkishIdValidator",
     "UnparsedValuesValidator",
     "WorkDaysValidator",
     "default_validators",

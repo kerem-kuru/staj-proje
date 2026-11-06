@@ -1,0 +1,542 @@
+[
+  {
+    "file": "01_gecerli_ayse.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Tüm kurallara uyan form",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "ONAYLANDI",
+    "errors": [],
+    "warnings": []
+  },
+  {
+    "file": "02_gecerli_yabanci_elvin.pdf",
+    "student_number": "220101004",
+    "email": "elvin@ogrenci.edu.tr",
+    "title": "Yabancı uyruk, 99 ile başlayan numara",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "ONAYLANDI",
+    "errors": [],
+    "warnings": []
+  },
+  {
+    "file": "03_gecerli_haftada_3_gun_zeynep.pdf",
+    "student_number": "220101003",
+    "email": "zeynep@ogrenci.edu.tr",
+    "title": "Haftada 3 gün staj planı",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-28",
+    "plan_weekdays": [
+      0,
+      1,
+      2
+    ],
+    "plan_label": "14.06.2027 - 28.07.2027 (Pzt, Sal, Çar)",
+    "expected": "ONAYLANDI",
+    "errors": [],
+    "warnings": []
+  },
+  {
+    "file": "04_uyari_az_muhendis_ismail.pdf",
+    "student_number": "220101002",
+    "email": "ismail@ogrenci.edu.tr",
+    "title": "3 mühendis: onaylanır, mezun olunan bölüm sorulur",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "ONAYLANDI",
+    "errors": [],
+    "warnings": [
+      "engineer_count"
+    ]
+  },
+  {
+    "file": "05_uyari_ucretli_yurtdisi_fatma.pdf",
+    "student_number": "220101005",
+    "email": "fatma@ogrenci.edu.tr",
+    "title": "25 yaş üstü, ücretli ve yurtdışı staj: hatırlatma uyarıları",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "ONAYLANDI",
+    "errors": [],
+    "warnings": [
+      "internship_conditions"
+    ]
+  },
+  {
+    "file": "10_hata_bos_form.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Hiç doldurulmamış Ek-16",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "required_fields",
+      "signatures"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "11_hata_tc_kimlik.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "T.C. kimlik numarası algoritmadan geçmiyor",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "national_id_format",
+      "student_identity"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "12_hata_yabanci_99_degil_elvin.pdf",
+    "student_number": "220101004",
+    "email": "elvin@ogrenci.edu.tr",
+    "title": "Yabancı uyruk ama numara 99 ile başlamıyor",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "national_id_format",
+      "student_identity"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "13_hata_veri_seti_uyusmuyor.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Ad soyad ve doğum tarihi veri setinden farklı",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "student_identity"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "14_hata_telefon_bicimi.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Telefon +90 xxx xxx xx xx biçiminde değil",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "phone_format"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "15_hata_adres_eksik.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Adreste sokak, bina ve daire no yok",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "address_format",
+      "student_identity"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "16_hata_ogretim_yili_ardisik_degil.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "2026-2028: yıllar ardışık değil",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "academic_year"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "17_hata_yariyil_yok.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Öğretim yılında yarıyıl yazmıyor",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "academic_year"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "18_hata_tarih_ogretim_yili_disinda.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Staj Ekim 2027'de, öğretim yılı 2026-2027",
+    "plan_start": "2027-10-04",
+    "plan_end": "2027-11-01",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "04.10.2027 - 01.11.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "academic_year"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "19_hata_30_gun_kurali.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Staja 30 günden az kaldı; önerilen tarih gösterilir",
+    "plan_start": "2026-11-16",
+    "plan_end": "2026-12-11",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "16.11.2026 - 11.12.2026 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "internship_dates"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "20_hata_gun_sayisi.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Formda 25 gün yazıyor, hesaplanan 20",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "work_days"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "21_hata_plan_tarihi_uyusmuyor.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Formdaki tarihler seçilen plandan farklı",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "work_days"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "22_hata_ogrenci_onayi_dolu.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Öğrenci onay kısmı doldurulmuş",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "signatures"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "23_hata_danisman_onayi_dolu.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Staj danışmanı onay kısmı doldurulmuş",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "signatures"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "24_hata_kase_imza_yok.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "İşveren kaşesi ve imzası yok",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "signatures"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "25_hata_isveren_alani_bos.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "İşveren adı soyadı boş",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "required_fields"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "26_hata_muhendis_sifir.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Mühendis sayısı 0",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "engineer_count"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "30_okunamaz_baska_belge.pdf",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Ek-16 olmayan PDF",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "reader_error"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "31_okunamaz_goruntu.png",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "PNG kabul edilir; OCR final aşamasında",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "reader_error"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "32_okunamaz_word.docx",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Word kabul edilir; okuma final aşamasında",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "HATALI_EKSIK",
+    "errors": [
+      "reader_error"
+    ],
+    "warnings": []
+  },
+  {
+    "file": "33_reddedilir_format.txt",
+    "student_number": "220101001",
+    "email": "ayse@ogrenci.edu.tr",
+    "title": "Desteklenmeyen dosya türü, yüklenmez",
+    "plan_start": "2027-06-14",
+    "plan_end": "2027-07-09",
+    "plan_weekdays": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "plan_label": "14.06.2027 - 09.07.2027 (Pzt, Sal, Çar, Per, Cum)",
+    "expected": "REDDEDILDI",
+    "errors": [],
+    "warnings": []
+  }
+]

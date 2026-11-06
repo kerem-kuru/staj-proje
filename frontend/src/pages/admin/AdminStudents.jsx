@@ -31,8 +31,11 @@ export function AdminStudents() {
       <section className="card">
         <h2>CSV içe aktar</h2>
         <p className="muted">
-          Sütunlar: <code>ogrenci_no;ad;soyad;tc_kimlik_no;bolum;sinif;eposta</code> (ayırıcı ; veya ,). Var olan
-          öğrenci numaraları güncellenir.
+          Sütunlar:{' '}
+          <code>
+            ad;soyad;tc_kimlik_no;uyruk;ogrenci_no;dogum_tarihi;ikametgah_adresi;bolum;teslim_yili;onceki_staj_gun;eposta;telefon;saglik_statusu
+          </code>{' '}
+          (ayırıcı ; veya ,). Var olan öğrenci numaraları güncellenir.
         </p>
         <FileUploadForm accept=".csv" buttonLabel="İçe aktar" onUpload={handleImport} />
         {importResult && (
@@ -60,8 +63,11 @@ export function AdminStudents() {
             <tr>
               <th>Numara</th>
               <th>Ad soyad</th>
+              <th>Uyruk</th>
               <th>Bölüm</th>
-              <th>Sınıf</th>
+              <th>Teslim yılı</th>
+              <th>Önceki staj</th>
+              <th>Telefon</th>
               <th>Hesap</th>
             </tr>
           </thead>
@@ -70,8 +76,11 @@ export function AdminStudents() {
               <tr key={s.id}>
                 <td>{s.student_number}</td>
                 <td>{s.full_name}</td>
+                <td>{s.nationality || '—'}</td>
                 <td>{s.department}</td>
-                <td>{s.class_year ?? '—'}</td>
+                <td>{s.submission_year || '—'}</td>
+                <td>{s.previous_internship_days ?? '—'}</td>
+                <td>{s.phone || '—'}</td>
                 <td>{s.has_account ? 'Var' : 'Yok'}</td>
               </tr>
             ))}
